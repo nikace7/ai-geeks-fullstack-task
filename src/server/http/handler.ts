@@ -47,6 +47,19 @@ export async function readJson<S extends z.ZodType>(req: Request, schema: S): Pr
   return parsed.data;
 }
 
+/** Validates URL query parameters the same way readJson validates bodies. */
+export function readQuery<S extends z.ZodType>(req: Request, schema: S): z.output<S> {
+  const parsed = schema.safeParse(Object.fromEntries(new URL(req.url).searchParams));
+  if (!parsed.success) throw validationFailed(toFieldErrors(parsed.error));
+  return parsed.data;
+}
+
+/** The token from an "Authorization: Bearer <token>" header. */
+export function readBearerToken(req: Request): string | undefined {
+  const [scheme, token] = req.headers.get("authorization")?.split(" ") ?? [];
+  return scheme?.toLowerCase() === "bearer" && token ? token : undefined;
+}
+
 const uuidSchema = z.uuid();
 
 /** A malformed id is just an id that doesn't exist: 404, not a Postgres "invalid uuid" 500. */
