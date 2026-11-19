@@ -118,6 +118,7 @@ export function SurveyBuilder({ survey }: { survey: SurveyDetail }) {
   return (
     <>
       <BuilderHeader
+        surveyId={survey.id}
         title={draft.title.trim() || "Untitled survey"}
         status={live.status}
         version={live.version}

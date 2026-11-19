@@ -24,6 +24,9 @@ export const formatDate = (date: Date | string) => dateFormat.format(new Date(da
 
 export const formatNumber = (n: number) => numberFormat.format(n);
 
+/** Whole-number share of a total, 0 when the total is 0. */
+export const percent = (part: number, whole: number) => (whole ? Math.round((part / whole) * 100) : 0);
+
 /** "1 question", "3 questions". */
 export const plural = (n: number, word: string) => `${formatNumber(n)} ${word}${n === 1 ? "" : "s"}`;
 

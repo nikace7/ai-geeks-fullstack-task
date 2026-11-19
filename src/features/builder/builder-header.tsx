@@ -1,13 +1,14 @@
 "use client";
 
 import { Button, ButtonLink } from "@/components/ui/button";
-import { AlertIcon, CheckIcon, ChevronLeftIcon, RetryIcon, SpinnerIcon } from "@/components/ui/icons";
+import { AlertIcon, ChartIcon, CheckIcon, ChevronLeftIcon, RetryIcon, SpinnerIcon } from "@/components/ui/icons";
 import { Pill, StatusBadge } from "@/components/ui/status-badge";
 import { plural } from "@/lib/format";
 import type { SurveyStatus } from "@/server/surveys/service";
 import type { SaveState } from "./use-autosave";
 
 interface BuilderHeaderProps {
+  surveyId: string;
   title: string;
   status: SurveyStatus;
   version: number | null;
@@ -21,6 +22,7 @@ interface BuilderHeaderProps {
 }
 
 export function BuilderHeader({
+  surveyId,
   title,
   status,
   version,
@@ -49,6 +51,14 @@ export function BuilderHeader({
         )}
         <div className="grow" />
         <SaveStatus {...save} issueCount={issueCount} onShowIssue={onShowIssue} />
+        {version !== null && (
+          // `contents` lets the link sit in the flex row while the wrapper hides it on small screens.
+          <span className="hidden md:contents">
+            <ButtonLink href={`/surveys/${surveyId}/results`} variant="ghost" icon={<ChartIcon />}>
+              Results
+            </ButtonLink>
+          </span>
+        )}
         <Button
           variant="primary"
           disabled={publishBlockedBy !== null}

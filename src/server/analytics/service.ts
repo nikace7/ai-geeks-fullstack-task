@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, max, sql } from "drizzle-orm";
 import { RATING_MAX, RATING_MIN, type Question, type SurveyDefinition } from "@/core/survey-schema";
 import { db } from "@/server/db/client";
 import { responses, surveys, surveyVersions } from "@/server/db/schema";
@@ -14,6 +14,8 @@ export interface VersionSummary {
   version: number;
   publishedAt: Date;
   completed: number;
+  /** When the newest completed response arrived; null until the first one. */
+  lastCompletedAt: Date | null;
 }
 
 interface QuestionStatsBase {
@@ -45,6 +47,8 @@ export interface SurveyAnalytics {
   versions: VersionSummary[];
   /** The version these stats describe; null when the survey was never published. */
   version: number | null;
+  /** That version's questions as respondents saw them (conditions, required flags); null when never published. */
+  definition: SurveyDefinition | null;
   completed: number;
   inProgress: number;
   questions: QuestionStats[];
@@ -66,6 +70,7 @@ export async function getSurveyAnalytics(
       version: surveyVersions.version,
       publishedAt: surveyVersions.publishedAt,
       completed: count(responses.id),
+      lastCompletedAt: max(responses.completedAt),
     })
     .from(surveyVersions)
     .innerJoin(surveys, and(eq(surveys.id, surveyVersions.surveyId), eq(surveys.ownerId, ownerId)))
@@ -76,7 +81,7 @@ export async function getSurveyAnalytics(
 
   if (versions.length === 0) {
     await getSurvey(ownerId, surveyId); // 404 unless it exists and is ours
-    return { versions, version: null, completed: 0, inProgress: 0, questions: [] };
+    return { versions, version: null, definition: null, completed: 0, inProgress: 0, questions: [] };
   }
 
   const selected = requestedVersion === undefined ? versions[0] : versions.find((v) => v.version === requestedVersion);
@@ -97,6 +102,7 @@ export async function getSurveyAnalytics(
   return {
     versions,
     version: selected.version,
+    definition,
     completed: selected.completed,
     inProgress,
     questions: definition.questions.map((question) =>

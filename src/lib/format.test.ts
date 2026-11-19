@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { plural, timeAgo } from "./format";
+import { percent, plural, timeAgo } from "./format";
 
 describe("timeAgo", () => {
   const now = Date.parse("2026-11-20T12:00:00Z");
@@ -21,5 +21,12 @@ describe("plural", () => {
     expect(plural(1, "question")).toBe("1 question");
     expect(plural(0, "question")).toBe("0 questions");
     expect(plural(1200, "response")).toBe("1,200 responses");
+  });
+});
+
+describe("percent", () => {
+  it("rounds to a whole number and treats an empty total as 0%", () => {
+    expect(percent(14, 17)).toBe(82);
+    expect(percent(0, 0)).toBe(0);
   });
 });
