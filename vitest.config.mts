@@ -17,6 +17,8 @@ export default defineConfig({
     include: ["src/**/*.test.ts", "test/**/*.test.ts"],
     coverage: {
       provider: "v8",
+      // Text summaries only: the HTML reporter writes .js assets into the repo that ESLint would scan.
+      reporter: ["text", "json-summary"],
       include: ["src/core/**", "src/server/**"],
       exclude: ["**/*.test.ts", "src/server/db/schema.ts"],
     },
