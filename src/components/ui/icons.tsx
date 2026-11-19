@@ -57,6 +57,9 @@ export const ChartIcon = icon("M4 20V10M10 20V4M16 20v-7M22 20H2");
 export const PencilIcon = icon("M4 20h4L19 9l-4-4L4 16ZM13.5 6.5l4 4");
 export const LogOutIcon = icon("M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11");
 export const RetryIcon = icon("M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5");
+export const ArrowUpIcon = icon("M12 19V5M5 12l7-7 7 7");
+export const ArrowDownIcon = icon("M12 5v14M19 12l-7 7-7-7");
+export const GripIcon = icon("M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01", 3);
 export const BranchIcon = icon("M6 3v12M18 9a3 3 0 1 0 0-6a3 3 0 1 0 0 6ZM6 21a3 3 0 1 0 0-6a3 3 0 1 0 0 6ZM18 9a9 9 0 0 1-9 9");
 
 /** Question type icons, keyed by QuestionType. */

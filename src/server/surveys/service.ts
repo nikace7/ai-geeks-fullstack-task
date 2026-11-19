@@ -1,6 +1,7 @@
 import "server-only";
 import { isDeepStrictEqual } from "node:util";
 import { and, count, desc, eq, sql } from "drizzle-orm";
+import { z } from "zod";
 import { toFieldErrors } from "@/lib/api-contract";
 import { createEmptySurvey, surveyDefinitionSchema, type SurveyDefinition } from "@/core/survey-schema";
 import { db } from "@/server/db/client";
@@ -27,8 +28,12 @@ export interface SurveyDetail {
   status: SurveyStatus;
   latestVersion: number | null;
   draft: SurveyDefinition;
+  /** What respondents currently see: the latest version's definition. Null until the first publish. */
+  published: SurveyDefinition | null;
   /** True when the draft differs from what respondents currently see. */
   hasUnpublishedChanges: boolean;
+  /** Respondents partway through the latest version. They can still finish it after a new publish. */
+  inProgressCount: number;
   updatedAt: Date;
 }
 
@@ -87,20 +92,32 @@ export async function createSurvey(
 }
 
 export async function getSurvey(ownerId: string, surveyId: string): Promise<SurveyDetail> {
+  const survey = await findSurvey(ownerId, surveyId);
+  if (!survey) throw notFound("Survey");
+  return survey;
+}
+
+/** For pages: null when the id is malformed, unknown or another admin's, so the page can render its 404. */
+export async function findSurvey(ownerId: string, surveyId: string): Promise<SurveyDetail | null> {
+  if (!z.uuid().safeParse(surveyId).success) return null;
   const [survey] = await db
     .select({
       id: surveys.id,
       status: surveys.status,
       latestVersion: surveys.latestVersion,
       draft: surveys.draft,
+      published: surveyVersions.definition,
       hasUnpublishedChanges: unpublishedChanges,
+      inProgressCount: sql<number>`(
+        select count(*) from ${responses}
+        where ${responses.versionId} = ${surveyVersions.id} and ${responses.status} = 'in_progress'
+      )`.mapWith(Number),
       updatedAt: surveys.updatedAt,
     })
     .from(surveys)
     .leftJoin(surveyVersions, latestVersionJoin)
     .where(ownedBy(surveyId, ownerId));
-  if (!survey) throw notFound("Survey");
-  return survey;
+  return survey ?? null;
 }
 
 /**

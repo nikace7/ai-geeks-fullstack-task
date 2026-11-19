@@ -19,7 +19,8 @@ export default defineConfig({
       provider: "v8",
       // Text summaries only: the HTML reporter writes .js assets into the repo that ESLint would scan.
       reporter: ["text", "json-summary"],
-      include: ["src/core/**", "src/server/**"],
+      // UI files are checked in the browser; their pure logic lives in plain modules that are unit tested.
+      include: ["src/core/**", "src/server/**", "src/features/builder/draft-ops.ts", "src/features/builder/changes.ts"],
       exclude: ["**/*.test.ts", "src/server/db/schema.ts"],
     },
   },

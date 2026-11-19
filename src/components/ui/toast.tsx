@@ -16,6 +16,8 @@ interface Toast extends ToastInput {
 }
 
 const SUCCESS_MS = 4000;
+// Long enough to read the message, notice the mistake and reach the Undo button.
+const ACTION_MS = 8000;
 
 const ToastContext = createContext<(toast: ToastInput) => void>(() => {});
 
@@ -29,7 +31,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const show = useCallback((input: ToastInput) => {
     clearTimeout(timer.current);
     setToast({ ...input, id: Date.now() });
-    if (input.tone !== "error") timer.current = setTimeout(() => setToast(null), SUCCESS_MS);
+    if (input.tone !== "error") timer.current = setTimeout(() => setToast(null), input.action ? ACTION_MS : SUCCESS_MS);
   }, []);
 
   const dismiss = () => setToast(null);
