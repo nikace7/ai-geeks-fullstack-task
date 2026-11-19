@@ -16,7 +16,8 @@ const VARIANTS = {
 const SIZES = {
   sm: "h-8 gap-1.5 rounded-md px-2.5 text-[13px]",
   md: "h-9 gap-2 rounded-lg px-3.5 text-sm",
-  lg: "h-12 gap-2 rounded-[10px] px-6 text-base",
+  lg: "h-10 gap-2 rounded-lg px-4 text-sm",
+  xl: "h-12 gap-2 rounded-[10px] px-6 text-base",
   icon: "size-8 rounded-md",
 } as const;
 

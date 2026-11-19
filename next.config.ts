@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The admin home is the survey list; signed-out visitors are sent on to /login from there.
+  async redirects() {
+    return [{ source: "/", destination: "/surveys", permanent: false }];
+  },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

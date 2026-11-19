@@ -14,6 +14,10 @@ export interface SurveySummary {
   title: string;
   status: SurveyStatus;
   latestVersion: number | null;
+  questionCount: number;
+  /** Questions with a show-if condition, so the list can hint at branching surveys. */
+  logicCount: number;
+  hasUnpublishedChanges: boolean;
   responseCount: number;
   updatedAt: Date;
 }
@@ -48,6 +52,9 @@ const ownedBy = (surveyId: string, ownerId: string) => and(eq(surveys.id, survey
 // inside sql`` unqualified, so a subquery's "id" would silently bind to the inner table.
 const latestVersionJoin = and(eq(surveyVersions.surveyId, surveys.id), eq(surveyVersions.version, surveys.latestVersion));
 
+// Compared inside Postgres: jsonb equality ignores key order. Never published → null → true.
+const unpublishedChanges = sql<boolean>`${surveys.draft} is distinct from ${surveyVersions.definition}`;
+
 // ponytail: unpaginated; add cursor pagination on (updated_at, id) once an admin has hundreds of surveys.
 export function listSurveys(ownerId: string): Promise<SurveySummary[]> {
   return db
@@ -56,18 +63,25 @@ export function listSurveys(ownerId: string): Promise<SurveySummary[]> {
       title: sql<string>`${surveys.draft}->>'title'`,
       status: surveys.status,
       latestVersion: surveys.latestVersion,
+      questionCount: sql<number>`jsonb_array_length(${surveys.draft}->'questions')`.mapWith(Number),
+      logicCount: sql<number>`(select count(*) from jsonb_array_elements(${surveys.draft}->'questions') q where q ? 'showIf')`.mapWith(Number),
+      hasUnpublishedChanges: unpublishedChanges,
       responseCount: count(responses.id),
       updatedAt: surveys.updatedAt,
     })
     .from(surveys)
+    .leftJoin(surveyVersions, latestVersionJoin)
     .leftJoin(responses, and(eq(responses.surveyId, surveys.id), eq(responses.status, "completed")))
     .where(eq(surveys.ownerId, ownerId))
-    .groupBy(surveys.id)
+    .groupBy(surveys.id, surveyVersions.id)
     .orderBy(desc(surveys.updatedAt));
 }
 
-export async function createSurvey(ownerId: string, title?: string): Promise<SurveyDetail> {
-  const draft = { ...createEmptySurvey(), ...(title && { title }) };
+/** Starts from an empty survey, or from a full draft (e.g. the sample survey) in one request. */
+export async function createSurvey(
+  ownerId: string,
+  { title, draft = { ...createEmptySurvey(), ...(title && { title }) } }: { title?: string; draft?: SurveyDefinition } = {},
+): Promise<SurveyDetail> {
   const [survey] = await db.insert(surveys).values({ ownerId, draft }).returning({ id: surveys.id });
   return getSurvey(ownerId, survey.id);
 }
@@ -79,8 +93,7 @@ export async function getSurvey(ownerId: string, surveyId: string): Promise<Surv
       status: surveys.status,
       latestVersion: surveys.latestVersion,
       draft: surveys.draft,
-      // Compared inside Postgres: jsonb equality ignores key order. Never published → null → true.
-      hasUnpublishedChanges: sql<boolean>`${surveys.draft} is distinct from ${surveyVersions.definition}`,
+      hasUnpublishedChanges: unpublishedChanges,
       updatedAt: surveys.updatedAt,
     })
     .from(surveys)
