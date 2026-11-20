@@ -5,7 +5,9 @@ import { defineConfig } from "drizzle-kit";
 // Node's built-in loader is enough; no dotenv dependency needed.
 if (existsSync(".env")) process.loadEnvFile(".env");
 
-const url = process.env.DATABASE_URL;
+// Migrations prefer a direct connection: Neon (via Vercel) also sets DATABASE_URL_UNPOOLED, and
+// schema changes shouldn't go through its connection pooler. Locally only DATABASE_URL exists.
+const url = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL is not set. Copy .env.example to .env.");
 
 export default defineConfig({
