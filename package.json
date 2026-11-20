@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
+    "test:unit": "vitest run --project unit",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:up": "docker compose up -d --wait",
