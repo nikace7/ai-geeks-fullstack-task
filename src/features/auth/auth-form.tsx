@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { fieldClasses } from "@/components/ui/cx";
 import { FieldError, FormError } from "@/components/ui/field";
@@ -41,9 +40,7 @@ interface Credentials {
 
 export function AuthForm({ mode }: { mode: keyof typeof COPY }) {
   const copy = COPY[mode];
-  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
-  const [isNavigating, startNavigation] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const { run, status, error, reset } = useAction((body: Credentials) => api(copy.endpoint, { body }));
 
@@ -63,8 +60,10 @@ export function AuthForm({ mode }: { mode: keyof typeof COPY }) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const result = await run({ email: String(form.get("email")), password: String(form.get("password")) });
-    // Stay in the pending state until the dashboard has rendered, not just until the cookie is set.
-    if (result?.success) startNavigation(() => router.replace("/surveys"));
+    // A full page load, not router.replace: the logo prefetched /surveys while signed out, and the
+    // client router would replay that cached redirect straight back to /login.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- the full load is the fix
+    if (result?.success) window.location.assign("/surveys");
   }
 
   return (
@@ -150,7 +149,8 @@ export function AuthForm({ mode }: { mode: keyof typeof COPY }) {
         type="submit"
         variant="primary"
         size="lg"
-        status={isNavigating ? "pending" : status}
+        // Stays pending after success, until the dashboard replaces this page.
+        status={status === "done" ? "pending" : status}
         pendingLabel={copy.pending}
       >
         {copy.submit}

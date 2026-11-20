@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOutIcon } from "@/components/ui/icons";
 import { useToast } from "@/components/ui/toast";
@@ -9,9 +7,7 @@ import { useAction } from "@/components/ui/use-action";
 import { api } from "@/lib/api-client";
 
 export function SignOutButton() {
-  const router = useRouter();
   const toast = useToast();
-  const [isLeaving, startLeaving] = useTransition();
   const { run, status } = useAction(() => api<null>("/auth/logout", { method: "POST" }));
 
   async function handleClick() {
@@ -21,11 +17,10 @@ export function SignOutButton() {
       toast({ message: `Couldn't sign out. ${result.error.message}`, tone: "error" });
       return;
     }
-    startLeaving(() => {
-      router.replace("/login");
-      // Drops cached admin pages, so Back can't show them after signing out.
-      router.refresh();
-    });
+    // A full page load drops the client router's cached admin pages; router.refresh() only clears the
+    // current route, so the logo link could still serve a cached dashboard after signing out.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- the full load is the fix
+    window.location.assign("/login");
   }
 
   return (
@@ -33,7 +28,7 @@ export function SignOutButton() {
       variant="ghost"
       size="sm"
       icon={<LogOutIcon size={14} />}
-      status={isLeaving || status === "done" ? "pending" : status}
+      status={status === "done" ? "pending" : status}
       pendingLabel="Signing out…"
       onClick={handleClick}
     >
