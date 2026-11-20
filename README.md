@@ -2,7 +2,7 @@
 
 A full-stack survey platform. Admins build surveys with conditional logic, publish them as immutable versions and read the results. Respondents answer through a public link, with no account, and can leave and pick up where they left off.
 
-- **Live demo:** _add the deployed URL here_
+- **Live demo:** https://ai-geeks-fullstack-task.vercel.app
 - **Demo video:** _add the video link here_
 - **Demo login:** `demo@example.com`. The password is `DEMO_PASSWORD` in [.env.example](.env.example).
 
@@ -239,18 +239,15 @@ Coverage: about 97% of statements and 93% of branches.
 
 ## Deploying
 
-The app is a standard Next.js app, so any Node host works. The setup this README assumes is **Vercel + Neon** (serverless Postgres):
+The live demo runs on **Vercel + Neon** (serverless Postgres). It's a standard Next.js app, so any Node host works, but this is the setup used:
 
-1. Create a Neon project. Copy the **pooled** connection string.
-2. Run the migrations and seed the demo account against it:
+1. Import the repo into Vercel and add `JWT_SECRET`: 32+ random characters (`.env.example` shows how to generate one). This first build fails, because there's no database yet.
+2. In the project's **Storage** tab, create a Neon database and connect it to the project. That sets `DATABASE_URL` (pooled, used by the app) and `DATABASE_URL_UNPOOLED` (direct, used by migrations).
+3. Redeploy. [vercel.json](vercel.json) runs `pnpm db:migrate` before every build, so the schema is up to date before new code goes live. Migrations must stay backward compatible, because the previous deployment keeps serving until the new one is ready.
+4. Seed the demo account once, from your machine. `DEMO_PASSWORD` is read from your `.env`:
    ```bash
-   DATABASE_URL="<neon url>" pnpm db:migrate
-   DATABASE_URL="<neon url>" DEMO_PASSWORD="<password>" pnpm db:seed
+   DATABASE_URL="<neon url>" pnpm db:seed
    ```
-3. Import the repo into Vercel and set the environment variables:
-   - `DATABASE_URL`: the pooled Neon URL
-   - `JWT_SECRET`: 32+ random characters (`.env.example` shows how to generate one)
-4. Deploy.
 
 ## Trade-offs and next steps
 
