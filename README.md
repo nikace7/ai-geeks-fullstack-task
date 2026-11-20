@@ -3,7 +3,7 @@
 A full-stack survey platform. Admins build surveys with conditional logic, publish them as immutable versions and read the results. Respondents answer through a public link, with no account, and can leave and pick up where they left off.
 
 - **Live demo:** https://ai-geeks-fullstack-task.vercel.app
-- **Demo video:** _add the video link here_
+- **Demo video:** https://drive.google.com/file/d/1cmKZ6_hcUPPLZMZSNZYLInom5VCv6dAq/view
 - **Demo login:** `demo@example.com`. The password is `DEMO_PASSWORD` in [.env.example](.env.example).
 
 Built with Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, PostgreSQL, Drizzle ORM, Zod and Vitest.
