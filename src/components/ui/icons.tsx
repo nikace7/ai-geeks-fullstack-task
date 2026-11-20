@@ -38,7 +38,9 @@ export const InfoIcon = icon("M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18ZM12 11v5M12 8h
 export const LinkIcon = icon("M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5");
 export const MoreIcon = icon("M5 12h.01M12 12h.01M19 12h.01", 2.5);
 export const DocumentIcon = icon("M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM8 8h8M8 12h8M8 16h4", 1.75);
-export const LogoIcon = icon("M6 8h12M6 12h8M6 16h5", 2.5);
+/** The product mark. Also drawn into the favicon and home-screen icon (src/components/app-icon.tsx). */
+export const LOGO_PATH = "M6 8h12M6 12h8M6 16h5";
+export const LogoIcon = icon(LOGO_PATH, 2.5);
 export const ChevronLeftIcon = icon("M15 18l-6-6 6-6");
 export const ChevronUpIcon = icon("M18 15l-6-6-6 6");
 export const ChevronDownIcon = icon("M6 9l6 6 6-6");
