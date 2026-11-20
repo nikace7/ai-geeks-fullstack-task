@@ -49,6 +49,8 @@ export interface ResumableResponse {
   acceptingResponses: boolean;
   definition: SurveyDefinition;
   answers: Answers;
+  startedAt: Date;
+  completedAt: Date | null;
 }
 
 const hashToken = (token: string) => createHash("sha256").update(token).digest("base64url");
@@ -104,6 +106,8 @@ export async function getResumableResponse(responseId: string, resumeToken: stri
       surveyStatus: surveys.status,
       definition: surveyVersions.definition,
       answers: responses.answers,
+      startedAt: responses.createdAt,
+      completedAt: responses.completedAt,
     })
     .from(responses)
     .innerJoin(surveyVersions, eq(surveyVersions.id, responses.versionId))
