@@ -89,7 +89,9 @@ export function SurveyList({ surveys }: { surveys: SurveySummary[] }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-[10px] border border-zinc-200 bg-white">
+      {/* `relative` keeps the absolutely positioned sr-only header inside this scroll box;
+          without it, that span widens the whole page on narrow screens. */}
+      <div className="relative overflow-x-auto rounded-[10px] border border-zinc-200 bg-white">
         <table className="w-full min-w-[900px] table-fixed border-collapse text-left">
           <thead className="text-xs text-zinc-500">
             <tr>
