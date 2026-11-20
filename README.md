@@ -50,23 +50,23 @@ Beyond the brief:
 
 ```mermaid
 flowchart LR
-  subgraph Browser
-    B[Builder] --- R[Results]
-    F[Public form]
+  subgraph client [Browser]
+    ui["Builder, results and public form"]
   end
-  subgraph Next.js
-    P[Server-rendered pages]
-    A["/api/v1 route handlers"]
-    S["Services (src/server)"]
-    C["Core (src/core)<br/>schema · logic · validation"]
+  subgraph server [Next.js server]
+    pages[Server-rendered pages]
+    api["API route handlers, /api/v1"]
+    services["Services, src/server"]
   end
-  DB[(PostgreSQL)]
+  core["Shared core, src/core<br/>schema, logic, validation"]
+  db[(PostgreSQL)]
 
-  B & R & F -->|fetch JSON| A
-  P --> S
-  A --> S --> DB
-  S --> C
-  F & B -. same logic in the browser .-> C
+  ui -->|JSON over fetch| api
+  pages --> services
+  api --> services
+  services --> db
+  services -.-> core
+  ui -.->|same code in the browser| core
 ```
 
 The code has four layers. Each one only imports from the layers below it.
