@@ -9,6 +9,8 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
   title: { default: "Survey Builder", template: "%s · Survey Builder" },
   description: "Build surveys with branching logic, share a link, and see the results.",
+  // Survey links are unlisted: only people who are sent one should find it, not search engines.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
